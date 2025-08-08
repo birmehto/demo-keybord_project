@@ -1,0 +1,30 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    file_names: ignore
+    void_checks: ignore
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.gr.dart"
+
+linter:
+  rules:
+    # ⚡️ Prefer const: reduces widget rebuilds and memory usage
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_literals_to_create_immutables: true
+
+    # 🧠 Avoid unnecessary widget rebuilds and usage
+    avoid_unnecessary_containers: true
+    sized_box_for_whitespace: true
+    use_key_in_widget_constructors: true
+
+    # 💾 Optimize memory and prevent unnecessary variables
+    prefer_final_locals: true
+    prefer_final_fields: true
+
+    # ✂️ Code cleanup to avoid extra processing
+    unnecessary_this: true
+    avoid_redundant_argument_values: true
