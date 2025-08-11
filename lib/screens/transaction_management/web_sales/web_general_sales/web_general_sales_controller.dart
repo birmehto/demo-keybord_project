@@ -16,6 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:searchfield/searchfield.dart';
 
 class ItemRowModel {
   final TextEditingController packagingControllerHeader =
@@ -1330,90 +1331,109 @@ class WebGeneralSalesController extends GetxController {
                         /// --- ITEM FIELD ---
                         CommonTableCellContainer(
                           flex: 4,
-                          child: CommonAutoCompleteTextView<ProductModel>(
+                          child: SearchField<ProductModel>(
+                            suggestions: const [],
                             controller: row.productController,
                             focusNode: row.productFocused,
-                            nextFocusNode: row.batchFocused,
-                            hintText: 'Item (Min 3 Char For Search)',
-                            suggestionsCallback: (pattern) async {
+                            searchInputDecoration: SearchInputDecoration(
+                              hintText: 'Item (Min 3 Char For Search)',
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 8,
+                              ),
+                            ),
+                            // We build the suggestions dynamically by listening to the input
+                            onSearchTextChanged: (pattern) async {
                               final trimmed = pattern.trim();
-                              if (trimmed.length < 3) return [];
+                              if (trimmed.length < 3) {
+                                return <SearchFieldListItem<ProductModel>>[];
+                              }
                               await fetchProductBySearch(trimmed);
-                              return mainList.value.data ?? [];
-                            },
-                            displayString: (item) => item.iTEMNAME ?? '',
-                            itemBuilder: (context, suggestion) {
-                              final stockValue =
-                                  double.tryParse('${suggestion.cSTK}') ?? 0;
-                              final stockColor =
-                                  stockValue > 0 ? Colors.green : Colors.red;
+                              final list = mainList.value.data ?? [];
+                              return list.map((suggestion) {
+                                final stockValue =
+                                    double.tryParse('${suggestion.cSTK}') ?? 0;
+                                final stockColor =
+                                    stockValue > 0 ? Colors.green : Colors.red;
 
-                              return ListTile(
-                                visualDensity: const VisualDensity(
-                                  horizontal: -2,
-                                  vertical: -4,
-                                ),
-                                title: CommonText(
-                                  text: suggestion.iTEMNAME ?? '',
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
+                                return SearchFieldListItem<ProductModel>(
+                                  suggestion.iTEMNAME ?? '',
+                                  item: suggestion,
+                                  child: ListTile(
+                                    visualDensity: const VisualDensity(
+                                      horizontal: -2,
+                                      vertical: -4,
+                                    ),
+                                    title: CommonText(
+                                      text: suggestion.iTEMNAME ?? '',
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Expanded(
-                                          child: Text.rich(
-                                            TextSpan(
-                                              text: 'Cl Stock: ',
-                                              children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text.rich(
                                                 TextSpan(
-                                                  text: stockValue.toString(),
-                                                  style: TextStyle(
-                                                    color: stockColor,
-                                                    fontSize: 14,
-                                                  ),
+                                                  text: 'Cl Stock: ',
+                                                  children: [
+                                                    TextSpan(
+                                                      text:
+                                                          stockValue.toString(),
+                                                      style: TextStyle(
+                                                        color: stockColor,
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ],
+                                              ),
                                             ),
-                                          ),
+                                            Expanded(
+                                              child: CommonText(
+                                                text:
+                                                    "Company : ${suggestion.deptment?.dEPTNAME ?? ''}",
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        Expanded(
-                                          child: CommonText(
-                                            text:
-                                                "Company : ${suggestion.deptment?.dEPTNAME ?? ''}",
-                                          ),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: CommonText(
+                                                text:
+                                                    "Packing : ${suggestion.uNIT}",
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: CommonText(
+                                                text:
+                                                    "Rate : ₹${suggestion.sRATE1}",
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: CommonText(
+                                                text:
+                                                    "MRP : ₹${suggestion.mRP}",
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: CommonText(
-                                            text:
-                                                "Packing : ${suggestion.uNIT}",
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: CommonText(
-                                            text:
-                                                "Rate : ₹${suggestion.sRATE1}",
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: CommonText(
-                                            text: "MRP : ₹${suggestion.mRP}",
-                                          ),
-                                        ),
-                                      ],
+                                    trailing: const Icon(
+                                      Icons.keyboard_arrow_right,
                                     ),
-                                  ],
-                                ),
-                                trailing: const Icon(
-                                  Icons.keyboard_arrow_right,
-                                ),
-                              );
+                                  ),
+                                );
+                              }).toList();
                             },
-                            onSelected: (selectedItem) {
+                            onSuggestionTap: (
+                              SearchFieldListItem<ProductModel> selected,
+                            ) {
+                              final selectedItem = selected.item!;
                               row.selectedProduct.value = selectedItem;
                               row.productController.text =
                                   selectedItem.iTEMNAME ?? '';
@@ -1430,8 +1450,12 @@ class WebGeneralSalesController extends GetxController {
 
                               updateBatchList(row, selectedItem.itemdtls ?? []);
                               addRow();
+
+                              // Move focus to batch field like before
+                              FocusScope.of(
+                                context,
+                              ).requestFocus(row.batchFocused);
                             },
-                            onClear: () => row.clearProductBatchFields(),
                           ),
                         ),
 

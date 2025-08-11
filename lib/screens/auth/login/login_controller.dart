@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:demo_project/api/dio_client.dart';
@@ -154,12 +155,18 @@ class LoginController extends GetxController {
             fetchFirmDropdown();
           }
         } else {
+          log('Error:>>> ${response.statusCode}');
+          errorMsg.value = response.data['message'];
+
           AppSnackBar.showGetXCustomSnackBar(message: response.data['message']);
         }
       } else {
+        errorMsg.value = Constants.networkMsg;
         AppSnackBar.showGetXCustomSnackBar(message: Constants.networkMsg);
       }
     } catch (e) {
+      log('Error:>>> $e');
+
       Utils.handleException(e);
     } finally {
       isLoading(false);
