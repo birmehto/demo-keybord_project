@@ -187,8 +187,9 @@ class _CommonAutoCompleteTextViewState<T extends Object>
             color: Theme.of(context).colorScheme.surfaceContainer,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.5,
-                  maxWidth: MediaQuery.of(context).size.width * 0.5),
+                  maxHeight: MediaQuery.of(context).size.height * 0.4,
+                  maxWidth: MediaQuery.of(context).size.width * 0.8,
+                  minWidth: 400),
               child: ListView.builder(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,

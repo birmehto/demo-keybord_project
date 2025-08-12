@@ -287,6 +287,8 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                     ).paddingOnly(top: 10)
                     : CommonSearchableDropdown2<PartyModel>(
                       controller: controller.partyController.value,
+                     
+    
                       // focusNode: controller.partyFocus,
                       labelText: 'Party Name',
                       // maxLength: 11,
@@ -416,6 +418,10 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                             selectedItem.sTATE.toString();
                         controller.selectedDropdownOutState.value =
                             selectedItem.oUTSTATE.toString();
+
+                            // WidgetsBinding.instance.addPostFrameCallback((_) {
+                            //     FocusScope.of(context).requestFocus(itemRowModel.productFocused);
+                            //   });
                       },
                       onClear: () {
                         controller.partyController.value.clear();

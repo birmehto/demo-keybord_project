@@ -12,6 +12,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PreferenceUtils.init();
 
+
   runApp(
     MultiProvider(
       providers: [

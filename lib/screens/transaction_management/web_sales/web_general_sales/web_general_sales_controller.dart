@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:searchfield/searchfield.dart';
+// import 'package:searchfield/searchfield.dart';
 
 class ItemRowModel {
   final TextEditingController packagingControllerHeader =
@@ -745,13 +746,14 @@ class WebGeneralSalesController extends GetxController {
                     spacing: 10,
                     children: [
                       Text((index + 1).toString()),
-                      CommonTableCellContainer(
+                      Expanded(
                         flex: 4,
                         child: CommonAutoCompleteTextView<ProductModel>(
                           controller: row.productController,
                           focusNode: row.productFocused,
                           nextFocusNode: row.batchFocused,
                           hintText: 'Item (Min 3 Char For Search)',
+
                           suggestionsCallback: (pattern) async {
                             final trimmed = pattern.trim();
                             if (trimmed.length < 3) return [];
@@ -760,88 +762,114 @@ class WebGeneralSalesController extends GetxController {
                           },
                           displayString: (item) => item.iTEMNAME ?? '',
                           itemBuilder: (context, suggestion) {
-                            return ListTile(
-                              visualDensity: const VisualDensity(
-                                horizontal: -2.0,
-                                vertical: -4.0,
-                              ),
-                              title: CommonText(
-                                text: suggestion.iTEMNAME ?? "",
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Builder(
-                                          builder: (_) {
-                                            final stockValue =
-                                                double.tryParse(
-                                                  '${suggestion.cSTK}',
-                                                ) ??
-                                                0;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Item Name
+                                CommonText(
+                                  text: suggestion.iTEMNAME ?? "",
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  maxLine: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
 
-                                            final color =
-                                                stockValue > 0
-                                                    ? Colors.green
-                                                    : Colors.red;
+                                // Stock and Company
+                                Row(
+                                  children: [
+                                    // Stock with background
+                                    Builder(
+                                      builder: (_) {
+                                        final stockValue =
+                                            double.tryParse(
+                                              '${suggestion.cSTK}',
+                                            ) ??
+                                            0;
 
-                                            return Text.rich(
-                                              TextSpan(
-                                                text: 'Cl Stock: ',
-                                                children: [
-                                                  TextSpan(
-                                                    text: stockValue.toString(),
-                                                    style: TextStyle(
-                                                      color: color,
-                                                      fontSize: 14,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        ),
+                                        final color =
+                                            stockValue > 0
+                                                ? Colors.green
+                                                : Colors.red;
+
+                                        return Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: color.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Stock: ${stockValue.toString()}',
+                                            style: TextStyle(
+                                              color: color,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: CommonText(
+                                        text:
+                                            "Company: ${suggestion.deptment?.dEPTNAME ?? 'N/A'}",
+                                        fontSize: 10,
+                                        color: Colors.black87,
+                                        maxLine: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      Expanded(
-                                        child: CommonText(
-                                          text:
-                                              "Company : ${suggestion.deptment?.dEPTNAME ?? ''}",
-                                        ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+
+                                // Pack, Rate, MRP
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: CommonText(
+                                        text:
+                                            "Pack: ${suggestion.uNIT ?? 'N/A'}",
+                                        fontSize: 10,
+                                        color: Colors.black87,
+                                        maxLine: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: CommonText(
-                                          text: "Packing : ${suggestion.uNIT}",
-                                        ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      flex: 2,
+                                      child: CommonText(
+                                        text:
+                                            "Rate: ₹${suggestion.sRATE1 ?? '0'}",
+                                        fontSize: 10,
+                                        color: Colors.black87,
+                                        maxLine: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      Expanded(
-                                        child: CommonText(
-                                          text: "Rate : ₹${suggestion.sRATE1}",
-                                        ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      flex: 2,
+                                      child: CommonText(
+                                        text: "MRP: ₹${suggestion.mRP ?? '0'}",
+                                        fontSize: 10,
+                                        color: Colors.black87,
+                                        maxLine: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      Expanded(
-                                        child: CommonText(
-                                          text: "MRP : ₹${suggestion.mRP}",
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              trailing: const Icon(Icons.keyboard_arrow_right),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             );
                           },
                           onSelected: (selectedItem) {
@@ -1239,10 +1267,14 @@ class WebGeneralSalesController extends GetxController {
                           controller: row.discountController,
                           focusNode: row.discountFocused,
                           nextFocusNode: row.gstFocused,
+
+                          
                           hintText: "Dis %",
                           showClearButton: false,
+                          
                           onChanged: (val) {
                             recalculateTotals(rows, searchTaxList);
+                            
                           },
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -1333,17 +1365,23 @@ class WebGeneralSalesController extends GetxController {
                           flex: 4,
                           child: SearchField<ProductModel>(
                             suggestions: const [],
+                            itemHeight: 100,
+                            maxSuggestionsInViewPort: 5,
+                            suggestionsDecoration: SuggestionDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              elevation: 4,
+                              // color: Colors.white,
+                            ),
                             controller: row.productController,
                             focusNode: row.productFocused,
                             searchInputDecoration: SearchInputDecoration(
                               hintText: 'Item (Min 3 Char For Search)',
                               border: const OutlineInputBorder(),
                               contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 8,
+                                horizontal: 12,
+                                vertical: 10,
                               ),
                             ),
-                            // We build the suggestions dynamically by listening to the input
                             onSearchTextChanged: (pattern) async {
                               final trimmed = pattern.trim();
                               if (trimmed.length < 3) {
@@ -1360,71 +1398,107 @@ class WebGeneralSalesController extends GetxController {
                                 return SearchFieldListItem<ProductModel>(
                                   suggestion.iTEMNAME ?? '',
                                   item: suggestion,
-                                  child: ListTile(
-                                    visualDensity: const VisualDensity(
-                                      horizontal: -2,
-                                      vertical: -4,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 95,
+                                    padding: const EdgeInsets.all(12.0),
+                                    decoration: const BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: Colors.grey,
+                                          width: 0.5,
+                                        ),
+                                      ),
                                     ),
-                                    title: CommonText(
-                                      text: suggestion.iTEMNAME ?? '',
-                                    ),
-                                    subtitle: Column(
+                                    child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
+                                        // Item Name
+                                        Flexible(
+                                          child: CommonText(
+                                            text: suggestion.iTEMNAME ?? "",
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            maxLine: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+
+                                        // Stock and Company Row
                                         Row(
                                           children: [
-                                            Expanded(
-                                              child: Text.rich(
-                                                TextSpan(
-                                                  text: 'Cl Stock: ',
-                                                  children: [
-                                                    TextSpan(
-                                                      text:
-                                                          stockValue.toString(),
-                                                      style: TextStyle(
-                                                        color: stockColor,
-                                                        fontSize: 14,
-                                                      ),
-                                                    ),
-                                                  ],
+                                            // Stock Badge
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: stockColor.withOpacity(
+                                                  0.15,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(3),
+                                              ),
+                                              child: Text(
+                                                'Stock: ${stockValue.toStringAsFixed(0)}',
+                                                style: TextStyle(
+                                                  color: stockColor,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600,
                                                 ),
                                               ),
                                             ),
+                                            const SizedBox(width: 8),
                                             Expanded(
                                               child: CommonText(
                                                 text:
-                                                    "Company : ${suggestion.deptment?.dEPTNAME ?? ''}",
+                                                    "Co: ${suggestion.deptment?.dEPTNAME ?? 'N/A'}",
+                                                fontSize: 10,
+                                                maxLine: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           ],
                                         ),
+
+                                        // Pack, Rate, MRP Row
                                         Row(
                                           children: [
                                             Expanded(
                                               child: CommonText(
                                                 text:
-                                                    "Packing : ${suggestion.uNIT}",
+                                                    "Pack: ${suggestion.uNIT ?? 'N/A'}",
+                                                fontSize: 10,
+                                                maxLine: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                             Expanded(
                                               child: CommonText(
                                                 text:
-                                                    "Rate : ₹${suggestion.sRATE1}",
+                                                    "Rate: ₹${suggestion.sRATE1 ?? '0'}",
+                                                fontSize: 10,
+                                                maxLine: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                             Expanded(
                                               child: CommonText(
                                                 text:
-                                                    "MRP : ₹${suggestion.mRP}",
+                                                    "MRP: ₹${suggestion.mRP ?? '0'}",
+                                                fontSize: 10,
+                                                maxLine: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           ],
                                         ),
                                       ],
-                                    ),
-                                    trailing: const Icon(
-                                      Icons.keyboard_arrow_right,
                                     ),
                                   ),
                                 );
@@ -1432,7 +1506,7 @@ class WebGeneralSalesController extends GetxController {
                             },
                             onSuggestionTap: (
                               SearchFieldListItem<ProductModel> selected,
-                            ) {
+                            ) async {
                               final selectedItem = selected.item!;
                               row.selectedProduct.value = selectedItem;
                               row.productController.text =
@@ -1449,168 +1523,261 @@ class WebGeneralSalesController extends GetxController {
                                   selectedItem.hSNNO?.toString() ?? '';
 
                               updateBatchList(row, selectedItem.itemdtls ?? []);
-                              addRow();
+                              
+                              // Auto-populate batch if only one batch available
+                              if (row.batchList.length == 1) {
+                                final singleBatch = row.batchList.first;
+                                row.selectedBatch.value = singleBatch;
+                                row.batchController.text = singleBatch.sIZECD ?? '';
+                                row.expiryDtController.text =
+                                    singleBatch.eXPDT?.isNotEmpty == true
+                                      ? AppDatePicker.convertDateTimeFormat(
+                                          singleBatch.eXPDT!,
+                                        "yyyy-MM-dd",
+                                        "dd/MM/yyyy",
+                                      )
+                                      : '';
 
-                              // Move focus to batch field like before
-                              FocusScope.of(
-                                context,
-                              ).requestFocus(row.batchFocused);
+                              row.rateController.text =
+                                    singleBatch.sALERATE1?.toString() ?? '';
+                              row.discountController.text =
+                                    singleBatch.sALEDISC?.toString() ?? '';
+                              row.mrpController.text =
+                                    singleBatch.mRP?.toString() ?? '';
+                              row.unitController.text =
+                                    singleBatch.pACKING?.toString() ?? '';
+                              row.barcodeController.text =
+                                    singleBatch.iTEMBARCDNO?.toString() ?? '';
+
+                              // Move focus to quantity field
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  FocusScope.of(context).requestFocus(row.qtyFocused);
+                                });
+                              } else {
+                                // Move focus to batch field
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  FocusScope.of(context).requestFocus(row.batchFocused);
+                                });
+                              }
+                              addRow();
+                            },
+                            onSubmit: (String value) {
+                              // Handle text submission without selection
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                FocusScope.of(context).requestFocus(row.batchFocused);
+                              });
                             },
                           ),
                         ),
-
                         /// --- BATCH FIELD ---
                         CommonTableCellContainer(
                           flex: 2,
-                          child: CommonAutoCompleteTextView<Itemdtls>(
+                          child: SearchField<Itemdtls>(
+                            suggestions: const [],
+                            itemHeight: 120,
+                            maxSuggestionsInViewPort: 4,
+                            suggestionsDecoration: SuggestionDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              elevation: 4,
+                            ),
                             controller: row.batchController,
                             focusNode: row.batchFocused,
-                            nextFocusNode: row.qtyFocused,
-                            hintText: 'Enter batch',
-                            textCapitalization: TextCapitalization.characters,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'[A-Za-z0-9]'),
+                            searchInputDecoration: SearchInputDecoration(
+                              hintText: 'Enter batch',
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
                               ),
-                            ],
-                            suggestionsCallback: (pattern) async {
+                            ),
+                            onSearchTextChanged: (pattern) async {
                               final search = pattern.toLowerCase().replaceAll(
                                 ' ',
                                 '',
                               );
-                              return row.batchList.where((item) {
-                                return (item.sIZECD ?? '')
-                                    .toLowerCase()
-                                    .contains(search);
-                              }).toList();
-                            },
-                            displayString: (item) => item.sIZECD ?? '',
-                            itemBuilder: (context, suggestion) {
-                              final stockValue =
-                                  double.tryParse('${suggestion.cLSTK}') ?? 0;
-                              final stockColor =
-                                  stockValue > 0 ? Colors.green : Colors.red;
+                              final filteredList =
+                                  row.batchList.where((item) {
+                                    return (item.sIZECD ?? '')
+                                        .toLowerCase()
+                                        .contains(search);
+                                  }).toList();
 
-                              String formatDate(String? rawDate) {
-                                if (rawDate == null || rawDate.isEmpty) {
-                                  return '';
+                              return filteredList.map((suggestion) {
+                                final stockValue =
+                                    double.tryParse('${suggestion.cLSTK}') ?? 0;
+                                final stockColor =
+                                    stockValue > 0 ? Colors.green : Colors.red;
+
+                                String formatDate(String? rawDate) {
+                                  if (rawDate == null || rawDate.isEmpty) {
+                                    return 'N/A';
+                                  }
+                                  try {
+                                    return AppDatePicker.convertDateTimeFormat(
+                                      rawDate,
+                                      'yyyy-MM-dd',
+                                      'dd-MM-yyyy',
+                                    );
+                                  } catch (_) {
+                                    return 'N/A';
+                                  }
                                 }
-                                try {
-                                  return AppDatePicker.convertDateTimeFormat(
-                                    rawDate,
-                                    'yyyy-MM-dd',
-                                    'dd-MM-yyyy',
-                                  );
-                                } catch (_) {
-                                  return '';
+
+                                final expDateStr = suggestion.eXPDT ?? '';
+                                DateTime? expDate;
+                                if (expDateStr.isNotEmpty) {
+                                  try {
+                                    expDate = DateTime.parse(expDateStr);
+                                  } catch (_) {}
                                 }
-                              }
+                                final isExpiringSoon =
+                                    expDate != null &&
+                                    expDate.isBefore(
+                                      DateTime.now().add(
+                                        const Duration(days: 180),
+                            ),
+                                    );
 
-                              final expDateStr = suggestion.eXPDT ?? '';
-                              DateTime? expDate;
-                              if (expDateStr.isNotEmpty) {
-                                try {
-                                  expDate = DateTime.parse(expDateStr);
-                                } catch (_) {}
-                              }
-                              final isExpiringSoon =
-                                  expDate != null &&
-                                  expDate.isBefore(
-                                    DateTime.now().add(
-                                      const Duration(days: 180),
-                                    ),
-                                  );
-
-                              return ListTile(
-                                title: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: CommonText(
-                                            text:
-                                                'Batch : ${suggestion.sIZECD ?? ''}',
-                                          ),
+                                return SearchFieldListItem<Itemdtls>(
+                                  suggestion.sIZECD ?? '',
+                                  item: suggestion,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 115,
+                                    padding: const EdgeInsets.all(12.0),
+                                    decoration: const BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: Colors.grey,
+                                          width: 0.5,
                                         ),
-                                        Expanded(
-                                          child: Text.rich(
-                                            TextSpan(
-                                              text: 'Cl Stock : ',
-                                              children: [
-                                                TextSpan(
-                                                  text: stockValue.toString(),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        // Batch Name and Stock
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 2,
+                                              child: CommonText(
+                                                text:
+                                                    'Batch: ${suggestion.sIZECD ?? 'N/A'}',
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                                maxLine: 1,
+                                                overflow: TextOverflow.ellipsis,
+                              ),
+                                            ),
+                                            Expanded(
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                              ),
+                                                decoration: BoxDecoration(
+                                                  color: stockColor.withOpacity(
+                                                    0.15,
+                            ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(3),
+                          ),
+                                                child: Text(
+                                                  'Stock: ${stockValue.toStringAsFixed(0)}',
                                                   style: TextStyle(
                                                     color: stockColor,
-                                                    fontSize: 14,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: CommonText(
-                                            text:
-                                                'Sale Rate : ₹${suggestion.sALERATE1 ?? ''}',
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: CommonText(
-                                            text:
-                                                'MRP : ₹${suggestion.mRP ?? ''}',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: CommonText(
-                                            text:
-                                                'MFG Dt : ${formatDate(suggestion.mFGDT)}',
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Text.rich(
-                                            TextSpan(
-                                              text: 'Exp Dt : ',
-                                              style: const TextStyle(
-                                                fontSize: 14,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w600,
+                        ),
+                            ),
                                               ),
-                                              children: [
-                                                TextSpan(
-                                                  text: formatDate(expDateStr),
-                                                  style: TextStyle(
-                                                    color:
-                                                        isExpiringSoon
-                                                            ? Colors.red
-                                                            : null,
-                                                  ),
-                                                ),
-                                              ],
+                              ),
+                            ],
+                                        ),
+                                        // Rate and MRP
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: CommonText(
+                                                text:
+                                                    'Rate: ₹${suggestion.sALERATE1 ?? '0'}',
+                                                fontSize: 11,
+                                                maxLine: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: CommonText(
-                                            text:
-                                                'Packing : ${suggestion.dESC2 ?? ''}',
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: CommonText(
-                                            text:
-                                                'MFG By : ${suggestion.dESC3 ?? ''}',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
+                                            Expanded(
+                                              child: CommonText(
+                                                text:
+                                                    'MRP: ₹${suggestion.mRP ?? '0'}',
+                                                fontSize: 11,
+                                                maxLine: 1,
+                                                overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                                            Expanded(
+                                              child: CommonText(
+                                                text:
+                                                    'Pack: ${suggestion.dESC2 ?? 'N/A'}',
+                                                fontSize: 11,
+                                                maxLine: 1,
+                                                overflow: TextOverflow.ellipsis,
+                        ),
+                              ),
+                                          ],
+                          ),
+
+                                        // Dates and MFG
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: CommonText(
+                                                text:
+                                                    'MFG: ${formatDate(suggestion.mFGDT)}',
+                                                fontSize: 10,
+                                                maxLine: 1,
+                                                overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                                            Expanded(
+                                              child: Text(
+                                                'Exp: ${formatDate(expDateStr)}',
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  color:
+                                                      isExpiringSoon
+                                                          ? Colors.red
+                                                          : Colors.white,
+                        ),
+                                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                                            Expanded(
+                                              child: CommonText(
+                                                text:
+                                                    'By: ${suggestion.dESC3 ?? 'N/A'}',
+                                                fontSize: 10,
+                                                maxLine: 1,
+                                                overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+        ],
+      ),
+                                  ),
+    );
+                              }).toList();
                             },
-                            onSelected: (selectedItem) {
+                            onSuggestionTap: (
+                              SearchFieldListItem<Itemdtls> selected,
+                            ) {
+                              final selectedItem = selected.item!;
                               row.selectedBatch.value = selectedItem;
                               row.batchController.text =
                                   selectedItem.sIZECD ?? '';
@@ -1635,55 +1802,81 @@ class WebGeneralSalesController extends GetxController {
                               row.barcodeController.text =
                                   selectedItem.iTEMBARCDNO?.toString() ?? '';
 
-                              // Set rest of the detail values...
+                              // Move focus to quantity field
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                FocusScope.of(context).requestFocus(row.qtyFocused);
+                              });
                             },
-                            onClear: () => row.clearBatchFields(),
+                            onSubmit: (p0) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                FocusScope.of(context).requestFocus(row.qtyFocused);
+                              });
+                            },
                           ),
                         ),
 
                         /// --- QTY ---
                         CommonTableCellContainer(
                           flex: 1,
-                          child: CommonAutoCompleteTextView<String>(
+                          child: TextField(
                             controller: row.qtyController,
                             focusNode: row.qtyFocused,
-                            nextFocusNode: row.freeQtyFocused,
-                            hintText: "Qty *",
-                            showClearButton: false,
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (_) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                FocusScope.of(context).requestFocus(row.freeQtyFocused);
+                              });
+                            },
                             onChanged:
                                 (val) => recalculateTotals(rows, searchTaxList),
+                            decoration: const InputDecoration(
+                              hintText: "Qty *",
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                            ),
                           ),
                         ),
 
                         /// --- FREE QTY ---
                         CommonTableCellContainer(
                           flex: 1,
-                          child: CommonAutoCompleteTextView<String>(
+                          child: TextField(
                             controller: row.freeQtyController,
                             focusNode: row.freeQtyFocused,
-                            nextFocusNode: row.rateFocused,
-                            hintText: "Free Qty",
-                            showClearButton: false,
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (_) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                FocusScope.of(context).requestFocus(row.rateFocused);
+                              });
+                            },
+                            decoration: const InputDecoration(
+                              hintText: "Free Qty",
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                            ),
                           ),
                         ),
 
                         /// --- RATE ---
                         CommonTableCellContainer(
                           flex: 1,
-                          child: CommonAutoCompleteTextView<String>(
+                          child: TextField(
                             controller: row.rateController,
                             focusNode: row.rateFocused,
-                            nextFocusNode: row.discountFocused,
-                            hintText: "Rate",
-                            showClearButton: false,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
@@ -1692,20 +1885,31 @@ class WebGeneralSalesController extends GetxController {
                                 RegExp(Utils.filterPatternWithDecimal0x2),
                               ),
                             ],
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (_) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                FocusScope.of(context).requestFocus(row.discountFocused);
+                              });
+                            },
                             onChanged:
                                 (val) => recalculateTotals(rows, searchTaxList),
+                            decoration: const InputDecoration(
+                              hintText: "Rate",
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                            ),
                           ),
                         ),
 
                         /// --- DISCOUNT ---
                         CommonTableCellContainer(
                           flex: 1,
-                          child: CommonAutoCompleteTextView<String>(
+                          child: TextField(
                             controller: row.discountController,
                             focusNode: row.discountFocused,
-                            nextFocusNode: row.gstFocused,
-                            hintText: "Dis %",
-                            showClearButton: false,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
@@ -1714,20 +1918,40 @@ class WebGeneralSalesController extends GetxController {
                                 RegExp(Utils.filterPatternWithDecimal0x2),
                               ),
                             ],
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (_) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                FocusScope.of(context).requestFocus(row.gstFocused);
+                              });
+                            },
                             onChanged:
                                 (val) => recalculateTotals(rows, searchTaxList),
+                            decoration: const InputDecoration(
+                              hintText: "Dis %",
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                            ),
                           ),
                         ),
 
                         /// --- GST (DISABLED) ---
                         CommonTableCellContainer(
                           flex: 1,
-                          child: CommonAutoCompleteTextView<String>(
+                          child: TextField(
                             controller: row.gstControllerHeader,
                             focusNode: row.gstFocused,
-                            hintText: "GST %",
-                            showClearButton: false,
                             enabled: false,
+                            decoration: const InputDecoration(
+                              hintText: "GST %",
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                            ),
                           ),
                         ),
 
