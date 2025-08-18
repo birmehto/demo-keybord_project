@@ -3,13 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  audioplayers_linux
   file_selector_linux
-  flutter_doc_scanner
-  open_file_linux
-  printing
-  syncfusion_pdfviewer_linux
-  url_launcher_linux
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

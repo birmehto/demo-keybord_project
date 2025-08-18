@@ -1,24 +1,23 @@
-import 'package:demo_project/app/app_date_format.dart';
-import 'package:demo_project/app/app_dimensions.dart';
-import 'package:demo_project/app/app_routes.dart';
-import 'package:demo_project/models/party_response.dart';
-import 'package:demo_project/screens/globalshortcutmanager.dart';
-import 'package:demo_project/screens/transaction_management/web_sales/web_general_sales/web_general_sales_controller.dart';
-import 'package:demo_project/utility/preference_utils.dart';
-import 'package:demo_project/utility/utils.dart';
-import 'package:demo_project/widgets/common_app_bar.dart';
-import 'package:demo_project/widgets/common_date_picker.dart';
-import 'package:demo_project/widgets/common_dropdown.dart';
-import 'package:demo_project/widgets/common_filled_button_with_icon.dart';
-import 'package:demo_project/widgets/common_input_field.dart';
-import 'package:demo_project/widgets/common_summary_box.dart';
-import 'package:demo_project/widgets/common_text.dart';
-import 'package:demo_project/widgets/common_text_button.dart';
+import 'package:demo/app/app_date_format.dart';
+import 'package:demo/app/app_dimensions.dart';
+import 'package:demo/app/app_routes.dart';
+import 'package:demo/models/party_response.dart';
+import 'package:demo/screens/globalshortcutmanager.dart';
+import 'package:demo/screens/transaction_management/web_sales/web_general_sales/web_general_sales_controller.dart';
+import 'package:demo/utility/preference_utils.dart';
+import 'package:demo/utility/utils.dart';
+import 'package:demo/widgets/common_app_bar.dart';
+import 'package:demo/widgets/common_date_picker.dart';
+import 'package:demo/widgets/common_dropdown.dart';
+import 'package:demo/widgets/common_filled_button_with_icon.dart';
+import 'package:demo/widgets/common_input_field.dart';
+import 'package:demo/widgets/common_summary_box.dart';
+import 'package:demo/widgets/common_serch_dropdown.dart';
+import 'package:demo/widgets/common_text.dart';
+import 'package:demo/widgets/common_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-
-import '../../../../widgets/common_serch_dropdown.dart';
 
 class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
   const WebGeneralSalesView({super.key});
@@ -77,6 +76,12 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                                 controller.discountPerController.value,
                             textInputType: TextInputType.number,
                             focusNode: controller.discountPerFocus,
+                            nextFocusNode: controller.discountAmtFocus,
+                            validator: controller.getFieldValidator(
+                              'discountPercent',
+                            ),
+                            onValidationError:
+                                controller.onFieldValidationError,
                             onChanged: controller.updateDiscountFromPercent,
                             suffixIcon: Icons.percent,
                           ),
@@ -92,6 +97,16 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                                 controller.discountAmtController.value,
                             textInputType: TextInputType.number,
                             focusNode: controller.discountAmtFocus,
+                            previousFocusNode: controller.discountPerFocus,
+                            nextFocusNode:
+                                controller.selectedPaymentMethod.value == 'Cash'
+                                    ? controller.cashReceivedFocus
+                                    : controller.narrationFocus,
+                            validator: controller.getFieldValidator(
+                              'discountAmount',
+                            ),
+                            onValidationError:
+                                controller.onFieldValidationError,
                             suffixIcon: Icons.currency_rupee,
                             onChanged: controller.updateDiscountFromAmount,
                           ),
@@ -113,17 +128,8 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                                 controller.selectedPaymentMethod.value,
                             hint: 'Select Mode of Payment',
                             onChanged: (String value) {
-                              controller.selectedPaymentMethod.value = value;
-
-                              if (controller.selectedPaymentMethod.value !=
-                                  'Cash') {
-                                controller.cashReceivedController.value.clear();
-                              } else {
-                                controller.cashReceivedController.value.text =
-                                    controller.netAmount.value
-                                        .toString()
-                                        .trim();
-                              }
+                              // Use the enhanced payment method selection handler
+                              controller.handlePaymentMethodSelection(value);
                             },
                           ),
                         ),
@@ -148,6 +154,14 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                                   ),
                                 ],
                                 focusNode: controller.cashReceivedFocus,
+                                previousFocusNode: controller.discountAmtFocus,
+                                nextFocusNode: controller.narrationFocus,
+                                validator: controller.getFieldValidator(
+                                  'cashReceived',
+                                ),
+                                onValidationError:
+                                    controller.onFieldValidationError,
+                                onChanged: controller.onCashReceivedChanged,
                               ).paddingOnly(top: 10),
                             )
                             : const SizedBox.shrink();
@@ -166,6 +180,10 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                             lableText: "Remarks",
                             maxLength: 255,
                             focusNode: controller.narrationFocus,
+                            previousFocusNode:
+                                controller.selectedPaymentMethod.value == 'Cash'
+                                    ? controller.cashReceivedFocus
+                                    : controller.discountAmtFocus,
                           ),
                         ).paddingOnly(top: 10),
                       ),
@@ -268,12 +286,22 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
             controller: controller.dtController.value,
             labelText: "Date",
             isEnabled: true,
+            focusNode: controller.dtFocus,
             onTap: () {
               Utils.closeKeyboard(context);
               AppDatePicker.allDateEnable(
                 context,
                 controller.dtController.value,
               );
+              // Trigger field completion when date is selected
+              Future.delayed(const Duration(milliseconds: 100), () {
+                if (controller.dtController.value.text.isNotEmpty) {
+                  controller.onFieldComplete(
+                    'date',
+                    controller.dtController.value.text,
+                  );
+                }
+              });
             },
           ),
         ),
@@ -287,11 +315,16 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                     ).paddingOnly(top: 10)
                     : CommonSearchableDropdown2<PartyModel>(
                       controller: controller.partyController.value,
-                     
-    
-                      // focusNode: controller.partyFocus,
                       labelText: 'Party Name',
-                      // maxLength: 11,
+                      // Enhanced focus management parameters
+                      focusNode: controller.partyFocus,
+                      nextFocusNode:
+                          controller.rows.isNotEmpty
+                              ? controller.rows.first.productFocused
+                              : null,
+                      previousFocusNode: controller.dtFocus,
+                      autoFocus: false,
+                      enableKeyboardNavigation: true,
                       suggestionsCallback: (pattern) async {
                         final search = pattern.toLowerCase().replaceAll(
                           ' ',
@@ -373,20 +406,6 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                                         }
                                         controller.fetchParty();
                                       });
-
-                                      // Get.toNamed(AppRoutes.addAccountRoute,
-                                      //     arguments: {
-                                      //       "AccCD": "",
-                                      //       "Type": "A",
-                                      //       "StateCD": PreferenceUtils.getFirmStateCD(),
-                                      //     })?.then((value) {
-                                      //   if (value != null &&
-                                      //       value is Map &&
-                                      //       value['ACC_CD'] != null) {
-                                      //     controller.insertACCCd.value = value['ACC_CD'].toString();
-                                      //   }
-                                      //   controller.fetchParty();
-                                      // });
                                     },
                                   ),
                                 ),
@@ -404,28 +423,19 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                         );
                       },
                       onSuggestionSelected: (selectedItem) {
-                        controller.selectedDropdownParty.value = selectedItem;
-                        controller.selectedDropdownPartyName.value =
-                            selectedItem.aCCNAME ?? '';
-                        controller.selectedDropdownPartyCode.value =
-                            selectedItem.aCCCD ?? '';
-                        controller.partyController.value.text =
-                            selectedItem.aCCNAME ?? '';
-                        controller.partyFocus.unfocus();
-                        controller.selectedDropdownStateCD.value =
-                            selectedItem.sTATECODE.toString();
-                        controller.selectedDropdownStateName.value =
-                            selectedItem.sTATE.toString();
-                        controller.selectedDropdownOutState.value =
-                            selectedItem.oUTSTATE.toString();
-
-                            // WidgetsBinding.instance.addPostFrameCallback((_) {
-                            //     FocusScope.of(context).requestFocus(itemRowModel.productFocused);
-                            //   });
+                        // Use the new party selection handler with auto-focus
+                        controller.onPartySelected(selectedItem);
+                      },
+                      onSelectionComplete: (selectedItem) {
+                        // This will be called after onSuggestionSelected
+                        // The auto-focus to next field is handled by the enhanced dropdown
+                      },
+                      onNotFound: (query) {
+                        // Handle "not found" scenario
+                        debugPrint('Party not found for query: $query');
                       },
                       onClear: () {
                         controller.partyController.value.clear();
-                        controller.partyFocus.unfocus();
                         controller.selectedDropdownParty.value = null;
                         controller.selectedDropdownPartyName.value = '';
                         controller.selectedDropdownPartyCode.value = '';
