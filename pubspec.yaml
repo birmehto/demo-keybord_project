@@ -1,10 +1,10 @@
 name: demo
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.1
 
 environment:
-  sdk: ^3.7.0
+  sdk: ^3.9.0
 
 dependencies:
   flutter:
@@ -27,14 +27,14 @@ dependencies:
   pdf: ^3.11.3
   shimmer: ^3.0.0
   flutter_typeahead: ^5.2.0
-  flex_color_scheme: ^8.2.0
   flutter_screenutil: ^5.9.3
   provider: ^6.1.5
+  flex_color_scheme: ^8.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

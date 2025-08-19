@@ -7,7 +7,8 @@ import 'package:demo/utility/utils.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../../../utility/network.dart';
+import '../../utility/network.dart';
+
 
 class AppDrawerController extends GetxController {
   var isLoading = false.obs;

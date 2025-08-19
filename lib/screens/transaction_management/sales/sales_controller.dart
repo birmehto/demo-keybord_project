@@ -9,9 +9,9 @@ import 'package:demo/app/app_snack_bar.dart';
 import 'package:demo/app/app_url.dart';
 import 'package:demo/models/firm_response.dart';
 import 'package:demo/models/party_response.dart';
-import 'package:demo/screens/transaction_management/sales/sales_expand_response.dart';
-import 'package:demo/screens/transaction_management/sales/sales_response.dart';
-import 'package:demo/screens/transaction_management/sales/sales_response_new.dart';
+import 'sales_expand_response.dart';
+import 'sales_response.dart';
+import 'sales_response_new.dart';
 import 'package:demo/utility/constants.dart';
 import 'package:demo/utility/preference_utils.dart';
 import 'package:demo/utility/utils.dart';
@@ -20,7 +20,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../utility/network.dart';
+import '../../../utility/network.dart';
 
 class SalesController extends GetxController {
   bool get isMobile =>

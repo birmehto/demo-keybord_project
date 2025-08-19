@@ -1,15 +1,11 @@
-import 'package:demo/screens/dashboard/dashboard_binding.dart';
-import 'package:demo/screens/dashboard/dashboard_view.dart';
-import 'package:demo/screens/drawer/app_drawer_view.dart';
-import 'package:demo/screens/others/splash/splash_view.dart';
-
-import 'package:demo/screens/transaction_management/sales/sales_binding.dart';
-import 'package:demo/screens/transaction_management/sales/sales_view.dart';
-import 'package:demo/screens/auth/login/login_binding.dart';
-import 'package:demo/screens/auth/login/login_view.dart';
-import 'package:demo/screens/transaction_management/web_sales/web_general_sales/web_general_sales_binding.dart';
-import 'package:demo/screens/transaction_management/web_sales/web_general_sales/web_general_sales_view.dart';
+import 'package:demo/screens/login/login_binding.dart';
+import 'package:demo/screens/login/login_view.dart';
+import 'package:demo/screens/splash/splash_view.dart';
+import 'package:demo/screens/transaction_management/web_sales/web_general_sales_binding.dart';
+import 'package:demo/screens/transaction_management/web_sales/web_general_sales_view.dart';
 import 'package:get/get.dart';
+
+import '../screens/transaction_management/sales/sales_binding.dart';
 
 class AppRoutes {
   static const initialRoute = '/splash_route';
@@ -333,20 +329,16 @@ class AppRoutes {
       binding: LoginBinding(),
       page: () => const LoginView(),
     ),
-    GetPage(
-      name: AppRoutes.dashBoardRoute,
-      binding: DashboardBinding(),
-      page: () => const DashboardView(),
-    ),
-    GetPage(
-      name: AppRoutes.drawerRoute,
-      //binding: AppDrawerBinding(),
-      page: () => AppDrawerView(),
-    ),
+
+    // GetPage(
+    //   name: AppRoutes.drawerRoute,
+    //   //binding: AppDrawerBinding(),
+    //   page: () => AppDrawerView(),
+    // ),
     GetPage(
       name: AppRoutes.salesRoute,
       binding: SalesBinding(),
-      page: () => const SalesView(),
+      page: () => const WebGeneralSalesView(), // TODO : chnge to web sales view
     ),
 
     //TODO : Web

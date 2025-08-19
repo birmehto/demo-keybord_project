@@ -4,7 +4,7 @@ import 'package:demo/app/app_font_weight.dart';
 import 'package:demo/app/app_routes.dart';
 import 'package:demo/models/party_response.dart';
 import 'package:demo/screens/drawer/app_drawer_controller.dart';
-import 'package:demo/screens/transaction_management/sales/sales_controller.dart';
+import 'sales_controller.dart';
 import 'package:demo/utility/preference_utils.dart';
 import 'package:demo/utility/utils.dart';
 import 'package:demo/widgets/common_app_bar.dart';

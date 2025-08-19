@@ -20,7 +20,6 @@ class AppSnackBar {
   static Future<void> showGetXCustomSnackBar({
     required String message,
     Color backgroundColor = Colors.red,
-    bool? isError,
   }) async {
     Get.showSnackbar(
       GetSnackBar(

@@ -1,12 +1,12 @@
 import 'package:demo/screens/transaction_management/web_sales/web_general_sales_controller.dart';
 import 'package:get/get.dart';
 
-import 'sales_controller.dart';
-
-class SalesBinding extends Bindings {
+class WebGeneralSalesBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => SalesController());
-    Get.lazyPut(() => WebGeneralSalesController());
+    Get.lazyPut(
+      () => WebGeneralSalesController(),
+      fenix: true, // Allows recreation if needed
+    );
   }
 }

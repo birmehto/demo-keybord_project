@@ -331,9 +331,9 @@ class Utils {
     return screenInches >= 7.0; // tablets typically >= 7 inches
   }
 
-  static formatPrice(double price) => '\$ ${price.toStringAsFixed(2)}';
+  static String formatPrice(double price) => '\$ ${price.toStringAsFixed(2)}';
 
-  static formatDate(DateTime date) => DateFormat('dd/MM/yyyy').format(date);
+  static String formatDate(DateTime date) => DateFormat('dd/MM/yyyy').format(date);
 
   static Future<bool> _requestPermission(Permission permission) async {
     if (await permission.isGranted) {
@@ -524,6 +524,7 @@ class Utils {
     );
   }
 
+  // ignore: strict_top_level_inference
   static String numberFormat(val) {
     return NumberFormat('#,##0.00').format(val);
   }

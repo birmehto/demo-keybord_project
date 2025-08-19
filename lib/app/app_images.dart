@@ -3,13 +3,13 @@ class AppImages {
   AppImages._();
 
   static const String icBackGround = 'assets/images/png/png_default.png';
-  static const String icArhamLogin = 'assets/images/png/ic_arham_login.png';
+  static const String icArhamLogin = 'assets/images/png/ic_arham__login.png';
   static const String icWelcome1 = 'assets/images/png/ic_pos_img_1.png';
   static const String icWelcome2 = 'assets/images/png/ic_pos_img_2.png';
   static const String icWelcome3 = 'assets/images/png/ic_pos_img_3.png';
   static const String icNoSearchFound =
       'assets/images/png/ic_no_search_found.png';
-  static const String icArhamLogo = 'assets/images/png/ic_arham_logo.png';
+  static const String icArhamLogo = 'assets/images/png/ic_arham__logo.png'; // TODO : Correct the path
   static const String svgNoData = 'assets/images/svg/svg_no_data_found.svg';
 
   //icons
