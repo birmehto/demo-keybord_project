@@ -1,15 +1,3 @@
-/// Web General Sales Controller
-///
-/// Improvements made:
-/// - Organized imports and removed unused variables
-/// - Simplified ItemRowModel by removing unused reactive variables
-/// - Improved memory management with proper disposal patterns
-/// - Extracted complex methods into smaller, focused functions
-/// - Enhanced error handling and network connectivity checks
-/// - Optimized calculation methods with better performance
-/// - Improved validation with cleaner separation of concerns
-/// - Better code organization and readability
-
 import 'package:demo/api/dio_client.dart';
 import 'package:demo/app/app_date_format.dart';
 import 'package:demo/app/app_snack_bar.dart';
@@ -55,6 +43,9 @@ class ItemRowModel {
   final freeQtyFocused = FocusNode();
   final rateFocused = FocusNode();
   final discountFocused = FocusNode();
+  final mrpFocused = FocusNode();
+  final unitFocused = FocusNode();
+  final barcodeFocused = FocusNode();
 
   // Reactive values
   final RxDouble total = 0.0.obs;
@@ -167,6 +158,9 @@ class ItemRowModel {
       freeQtyFocused,
       rateFocused,
       discountFocused,
+      mrpFocused,
+      unitFocused,
+      barcodeFocused,
     ];
 
     for (final focusNode in focusNodes) {
@@ -256,6 +250,7 @@ class WebGeneralSalesController extends GetxController {
   final cashReceivedFocus = FocusNode();
   final narrationController = TextEditingController().obs;
   final narrationFocus = FocusNode();
+  final paymentModeFocus = FocusNode();
 
   // UI state
   final isButtonClick = ''.obs;
@@ -334,6 +329,7 @@ class WebGeneralSalesController extends GetxController {
       discountPerFocus,
       cashReceivedFocus,
       narrationFocus,
+      paymentModeFocus,
     ];
 
     for (final focusNode in focusNodes) {
@@ -422,6 +418,9 @@ class WebGeneralSalesController extends GetxController {
       row.freeQtyFocused,
       row.rateFocused,
       row.discountFocused,
+      row.mrpFocused,
+      row.unitFocused,
+      row.barcodeFocused,
     ];
 
     for (final focusNode in focusNodes) {
@@ -436,10 +435,29 @@ class WebGeneralSalesController extends GetxController {
     FocusNode currentFocus,
     FocusNode? nextFocus,
   ) {
+    currentFocus.unfocus();
     if (nextFocus != null && nextFocus.canRequestFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(nextFocus);
+        if (Get.context != null) {
+          FocusScope.of(Get.context!).requestFocus(nextFocus);
+        }
       });
+    }
+  }
+
+  void focusFieldSafely(FocusNode? focusNode) {
+    if (focusNode != null && focusNode.canRequestFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (Get.context != null) {
+          FocusScope.of(Get.context!).requestFocus(focusNode);
+        }
+      });
+    }
+  }
+
+  void unfocusAllFields() {
+    if (Get.context != null) {
+      FocusScope.of(Get.context!).unfocus();
     }
   }
 
@@ -483,14 +501,17 @@ class WebGeneralSalesController extends GetxController {
         );
         break;
       case 'discount':
-        focusNextField(
-          context,
-          currentRow.discountFocused,
-          currentRow.gstFocused,
-        );
+        // Move to next row's product field or add new row
+        if (currentRowIndex < rows.length - 1) {
+          focusNextField(
+            context,
+            currentRow.discountFocused,
+            rows[currentRowIndex + 1].productFocused,
+          );
+        }
         break;
       case 'gst':
-        // Move to next row's product field or add new row
+        // GST field is disabled, skip to next row
         if (currentRowIndex < rows.length - 1) {
           focusNextField(
             context,
@@ -498,7 +519,6 @@ class WebGeneralSalesController extends GetxController {
             rows[currentRowIndex + 1].productFocused,
           );
         } else {
-          // Add new row and focus its product field
           addRow();
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (rows.isNotEmpty) {

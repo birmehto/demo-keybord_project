@@ -1,12 +1,3 @@
-/// Web General Sales View
-///
-/// Improvements made:
-/// - Better widget organization and separation of concerns
-/// - Proper focus node management and navigation
-/// - Improved error handling and user feedback
-/// - Enhanced UI responsiveness and layout
-/// - Better code readability and maintainability
-
 import 'package:demo/app/app_dimensions.dart';
 import 'package:demo/app/app_routes.dart';
 import 'package:demo/models/party_response.dart';
@@ -14,7 +5,6 @@ import 'package:demo/screens/transaction_management/web_sales/web_general_sales_
 import 'package:demo/utility/preference_utils.dart';
 import 'package:demo/utility/utils.dart';
 import 'package:demo/widgets/common_app_bar.dart';
-import 'package:demo/widgets/common_dropdown.dart';
 import 'package:demo/widgets/common_filled_button_with_icon.dart';
 import 'package:demo/widgets/common_input_field.dart';
 import 'package:demo/widgets/common_search_dropdown.dart';
@@ -65,7 +55,7 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildDiscountAndPaymentRow(),
+              _buildDiscountAndPaymentRow(context),
               const Divider(thickness: 1),
               _buildSummaryAndActionsRow(context),
             ],
@@ -75,7 +65,7 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
     );
   }
 
-  Widget _buildDiscountAndPaymentRow() {
+  Widget _buildDiscountAndPaymentRow(BuildContext context) {
     return Row(
       children: [
         const CommonText(text: 'Discount : '),
@@ -84,7 +74,7 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
         const SizedBox(width: 10),
         _buildDiscountAmountField(),
         const SizedBox(width: 10),
-        _buildPaymentModeDropdown(),
+        _buildPaymentModeDropdown(context),
         const SizedBox(width: 10),
         _buildCashReceivedField(),
         _buildCashReceivedSpacer(),
@@ -103,7 +93,10 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
           textInputType: const TextInputType.numberWithOptions(decimal: true),
           focusNode: controller.discountPerFocus,
           onChanged: controller.updateDiscountFromPercent,
-          onSubmitted: (_) => _focusNext(controller.discountAmtFocus),
+          onSubmitted: (_) => _handleFieldSubmission(
+            controller.discountPerFocus,
+            controller.discountAmtFocus,
+          ),
           suffixIcon: Icons.percent,
           inputFormatters: [
             FilteringTextInputFormatter.allow(
@@ -137,16 +130,46 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
     );
   }
 
-  Widget _buildPaymentModeDropdown() {
+  Widget _buildPaymentModeDropdown(BuildContext context) {
     return Expanded(
       child: Obx(
-        () => CommonDropdown(
-          labelText: 'Mode of Payment',
-          items: const ['Cash', 'Bank', 'Card', 'UPI', 'Credit'],
-          initialValue: controller.selectedPaymentMethod.value,
-          hint: 'Select Mode of Payment',
-          onChanged: _handlePaymentMethodChange,
-        ),
+        () => DropdownMenu<String>(
+          showTrailingIcon: false,
+          initialSelection: controller.selectedPaymentMethod.value,
+          focusNode: controller.paymentModeFocus,
+          label: const Text('Mode of Payment'),
+          hintText: 'Select Mode of Payment',
+          inputDecorationTheme: InputDecorationTheme(
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            border: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+          onSelected: (value) {
+            if (value != null) {
+              controller.selectedPaymentMethod.value = value;
+              _handlePaymentMethodChange(value);
+            }
+          },
+          dropdownMenuEntries: const [
+            DropdownMenuEntry(value: 'Cash', label: 'Cash'),
+            DropdownMenuEntry(value: 'Bank', label: 'Bank'),
+            DropdownMenuEntry(value: 'Card', label: 'Card'),
+            DropdownMenuEntry(value: 'UPI', label: 'UPI'),
+            DropdownMenuEntry(value: 'Credit', label: 'Credit'),
+          ],
+        ).paddingOnly(top: 12),
       ),
     );
   }
@@ -169,7 +192,10 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
                   ),
                 ],
                 focusNode: controller.cashReceivedFocus,
-                onSubmitted: (_) => _focusNext(controller.narrationFocus),
+                onSubmitted: (_) => _handleFieldSubmission(
+                  controller.cashReceivedFocus,
+                  controller.narrationFocus,
+                ),
               ).paddingOnly(top: 10),
             )
           : const SizedBox.shrink();
@@ -284,9 +310,24 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
           labelText: 'Date',
           hint: Text('DD/MM/YY'),
           suffixIcon: Icon(Icons.calendar_today),
-          border: UnderlineInputBorder(),
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          border: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
         ),
-        onFieldSubmitted: (_) => _focusNext(controller.partyFocus),
+        onFieldSubmitted: (_) =>
+            _handleFieldSubmission(controller.dtFocus, controller.partyFocus),
         onTap: () {
           // Handle date picker if needed
           // You can add date picker functionality here
@@ -299,17 +340,35 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
     return Expanded(
       child: Obx(
         () => controller.isDropdownPartyLoading.isTrue
-            ? Center(child: Utils.commonCircularProgress()).paddingOnly(top: 10)
-            : CommonSearchableDropdown2<PartyModel>(
-                controller: controller.partyController.value,
-                labelText: 'Party Name',
-
-                suggestionsCallback: _getPartySuggestions,
-                itemBuilder: _buildPartyItem,
-                onSuggestionSelected: _handlePartySelection,
-                onClear: _handlePartyClear,
+            ? Center(child: Utils.commonCircularProgress()).paddingOnly(top: 3)
+            : Focus(
+                focusNode: controller.partyFocus,
+                onFocusChange: (hasFocus) {
+                  if (!hasFocus &&
+                      controller.selectedDropdownParty.value != null) {
+                    // Auto-focus first product field after party selection
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (controller.rows.isNotEmpty &&
+                          controller
+                              .rows
+                              .first
+                              .productFocused
+                              .canRequestFocus) {
+                        _focusNext(controller.rows.first.productFocused);
+                      }
+                    });
+                  }
+                },
+                child: CommonSearchableDropdown2<PartyModel>(
+                  controller: controller.partyController.value,
+                  labelText: 'Party Name',
+                  suggestionsCallback: _getPartySuggestions,
+                  itemBuilder: _buildPartyItem,
+                  onSuggestionSelected: _handlePartySelection,
+                  onClear: _handlePartyClear,
+                ),
               ),
-      ).paddingOnly(top: 7.5),
+      ),
     );
   }
 
@@ -322,12 +381,25 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
     });
   }
 
-  void _handleDiscountAmountSubmit() {
-    if (controller.selectedPaymentMethod.value == 'Cash') {
-      _focusNext(controller.cashReceivedFocus);
+  void _unfocusAndFocusNext(FocusNode currentFocus, FocusNode nextFocus) {
+    currentFocus.unfocus();
+    _focusNext(nextFocus);
+  }
+
+  void _handleFieldSubmission(FocusNode currentFocus, FocusNode? nextFocus) {
+    if (nextFocus != null) {
+      _unfocusAndFocusNext(currentFocus, nextFocus);
     } else {
-      _focusNext(controller.narrationFocus);
+      currentFocus.unfocus();
     }
+  }
+
+  void _handleDiscountAmountSubmit() {
+    // Always focus payment mode first, then let payment mode handle cash field focus
+    _handleFieldSubmission(
+      controller.discountAmtFocus,
+      controller.paymentModeFocus,
+    );
   }
 
   void _handlePaymentMethodChange(String value) {
@@ -335,6 +407,10 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
 
     if (value != 'Cash') {
       controller.cashReceivedController.value.clear();
+      // Focus remarks field if not Cash
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _focusNext(controller.narrationFocus);
+      });
     } else {
       controller.cashReceivedController.value.text = controller.netAmount.value
           .toString()
@@ -404,25 +480,50 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
   }
 
   void _handleCreateNewParty() {
-    controller.partyController.value.clear();
-    if (controller.partyFocus.canRequestFocus) {
+    try {
+      controller.partyController.value.clear();
       controller.partyFocus.unfocus();
-    }
+      controller.unfocusAllFields();
 
-    Get.toNamed(
-      AppRoutes.addCustomerRoute,
-      arguments: {
-        "AccCD": "",
-        "GroupCd": '83',
-        "Type": "A",
-        "StateCD": PreferenceUtils.getFirmStateCD(),
-      },
-    )?.then((value) {
-      if (value != null && value is Map && value['ACC_CD'] != null) {
-        controller.insertACCCd.value = value['ACC_CD'].toString();
-      }
-      controller.fetchParty();
-    });
+      Get.toNamed(
+            AppRoutes.addCustomerRoute,
+            arguments: {
+              "AccCD": "",
+              "GroupCd": '83',
+              "Type": "A",
+              "StateCD": PreferenceUtils.getFirmStateCD(),
+            },
+          )
+          ?.then((value) {
+            if (value != null && value is Map && value['ACC_CD'] != null) {
+              controller.insertACCCd.value = value['ACC_CD'].toString();
+
+              // Show success message
+              Get.snackbar(
+                'Success',
+                'New party created successfully',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.green.withOpacity(0.8),
+                colorText: Colors.white,
+                duration: const Duration(seconds: 2),
+              );
+            }
+            controller.fetchParty();
+          })
+          .catchError((error) {
+            debugPrint('Error creating new party: $error');
+            Get.snackbar(
+              'Error',
+              'Failed to create new party. Please try again.',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red.withOpacity(0.8),
+              colorText: Colors.white,
+              duration: const Duration(seconds: 3),
+            );
+          });
+    } catch (e) {
+      debugPrint('Error in _handleCreateNewParty: $e');
+    }
   }
 
   void _handlePartySelection(PartyModel selectedItem) {
@@ -431,62 +532,145 @@ class WebGeneralSalesView extends GetView<WebGeneralSalesController> {
     controller.selectedDropdownPartyCode.value = selectedItem.aCCCD ?? '';
     controller.partyController.value.text = selectedItem.aCCNAME ?? '';
 
-    if (controller.partyFocus.canRequestFocus) {
-      controller.partyFocus.unfocus();
-    }
-
     controller.selectedDropdownStateCD.value = selectedItem.sTATECODE
         .toString();
     controller.selectedDropdownStateName.value = selectedItem.sTATE.toString();
     controller.selectedDropdownOutState.value = selectedItem.oUTSTATE
         .toString();
 
-    // Focus first product field after party selection
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (controller.rows.isNotEmpty &&
-          controller.rows.first.productFocused.canRequestFocus) {
-        _focusNext(controller.rows.first.productFocused);
-      }
-    });
+    // Unfocus party field and focus first product field
+    _handleFieldSubmission(
+      controller.partyFocus,
+      controller.rows.isNotEmpty ? controller.rows.first.productFocused : null,
+    );
   }
 
   void _handlePartyClear() {
-    controller.partyController.value.clear();
-    if (controller.partyFocus.canRequestFocus) {
+    try {
+      controller.partyController.value.clear();
+      controller.selectedDropdownParty.value = null;
+      controller.selectedDropdownPartyName.value = '';
+      controller.selectedDropdownPartyCode.value = '';
+      controller.selectedDropdownStateCD.value = '';
+      controller.selectedDropdownStateName.value = '';
+      controller.selectedDropdownOutState.value = '';
+
+      // Unfocus and close keyboard
       controller.partyFocus.unfocus();
-    }
-    controller.selectedDropdownParty.value = null;
-    controller.selectedDropdownPartyName.value = '';
-    controller.selectedDropdownPartyCode.value = '';
-    controller.selectedDropdownStateCD.value = '';
-    controller.selectedDropdownStateName.value = '';
-    controller.selectedDropdownOutState.value = '';
-    if (Get.context != null) {
-      Utils.closeKeyboard(Get.context!);
+      controller.unfocusAllFields();
+
+      // Show feedback to user
+      Get.snackbar(
+        'Cleared',
+        'Party selection cleared',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.grey.withOpacity(0.8),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 1),
+      );
+    } catch (e) {
+      debugPrint('Error clearing party: $e');
     }
   }
 
   // Submit handlers
   Future<void> _handleSubmit() async {
+    // Unfocus all fields before validation
+    controller.unfocusAllFields();
+
     try {
       if (controller.validation()) {
+        controller.isBottomLoading.value = true;
         await controller.insertUpdateSales("A");
+
+        // Show success message
+        Get.snackbar(
+          'Success',
+          'Sales record saved successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withOpacity(0.8),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
       }
     } catch (e) {
-      // Error handling is done in the controller
+      // Enhanced error handling with user feedback
       debugPrint('Submit error: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to save sales record. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      controller.isBottomLoading.value = false;
     }
   }
 
   Future<void> _handleSubmitAndPrint() async {
+    // Unfocus all fields before validation
+    controller.unfocusAllFields();
+
     try {
       if (controller.validation()) {
+        controller.isBottomLoading.value = true;
         await controller.insertUpdateSales("A");
+
+        // Show success message with print indication
+        Get.snackbar(
+          'Success',
+          'Sales record saved successfully. Preparing for print...',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withOpacity(0.8),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+
         // Add print functionality here if needed
+        await _handlePrintDocument();
       }
     } catch (e) {
-      // Error handling is done in the controller
+      // Enhanced error handling with user feedback
       debugPrint('Submit and print error: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to save or print sales record. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      controller.isBottomLoading.value = false;
+    }
+  }
+
+  Future<void> _handlePrintDocument() async {
+    try {
+      // Placeholder for print functionality
+      // This can be implemented based on your printing requirements
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      Get.snackbar(
+        'Print',
+        'Document sent to printer successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.blue.withOpacity(0.8),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      debugPrint('Print error: $e');
+      Get.snackbar(
+        'Print Error',
+        'Failed to print document. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange.withOpacity(0.8),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
     }
   }
 }

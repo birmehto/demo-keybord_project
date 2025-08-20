@@ -338,14 +338,14 @@ class AppRoutes {
     GetPage(
       name: AppRoutes.salesRoute,
       binding: SalesBinding(),
-      page: () => const WebGeneralSalesView(), // TODO : chnge to web sales view
+      page: () => WebGeneralSalesView(), // TODO : chnge to web sales view
     ),
 
     //TODO : Web
     GetPage(
       name: AppRoutes.webGeneralSalesRoute,
       binding: WebGeneralSalesBinding(),
-      page: () => const WebGeneralSalesView(),
+      page: () => WebGeneralSalesView(),
     ),
   ];
 }
