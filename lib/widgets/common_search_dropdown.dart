@@ -14,6 +14,7 @@ class CommonSearchableDropdown2<T> extends StatelessWidget {
   final Widget Function(BuildContext, T) itemBuilder;
   final void Function(T)? onSuggestionSelected;
   final VoidCallback? onClear;
+  final FocusNode? focusNode;
 
   const CommonSearchableDropdown2({
     super.key,
@@ -29,6 +30,7 @@ class CommonSearchableDropdown2<T> extends StatelessWidget {
     this.maxSuggestions = 11,
     this.debounceDuration = const Duration(milliseconds: 300),
     this.onClear,
+    this.focusNode,
   });
 
   @override
@@ -37,6 +39,7 @@ class CommonSearchableDropdown2<T> extends StatelessWidget {
 
     return SearchField<T>(
       controller: controller,
+      focusNode: focusNode,
       suggestions: const [], // initially empty
       onSearchTextChanged: (query) async {
         if (suggestionsCallback != null) {

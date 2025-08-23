@@ -470,16 +470,11 @@ class WebGeneralSalesController extends GetxController {
 
     switch (currentField) {
       case 'product':
-        if (currentRow.productController.text.isEmpty) {
-          // Skip entire row → jump to discount directly
-          focusNextField(context, currentRow.productFocused, discountPerFocus);
-        } else {
-          focusNextField(
-            context,
-            currentRow.productFocused,
-            currentRow.batchFocused,
-          );
-        }
+        focusNextField(
+          context,
+          currentRow.productFocused,
+          currentRow.batchFocused,
+        );
         break;
       case 'batch':
         focusNextField(context, currentRow.batchFocused, currentRow.qtyFocused);
@@ -509,10 +504,15 @@ class WebGeneralSalesController extends GetxController {
         if (currentRowIndex < rows.length - 1) {
           final nextRow = rows[currentRowIndex + 1];
 
+          final isEmptyRow =
+              (nextRow.productController.text.isEmpty &&
+              nextRow.batchController.text.isEmpty &&
+              nextRow.qtyController.text.isEmpty);
+
           focusNextField(
             context,
             currentRow.discountFocused,
-            nextRow.productFocused,
+            isEmptyRow ? discountPerFocus : nextRow.productFocused,
           );
         }
         break;
